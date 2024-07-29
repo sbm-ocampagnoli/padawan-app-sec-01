@@ -36,7 +36,12 @@ export const criarPaciente = async (
   try {
     const pacienteData = req.body
 
-    const sanitizarNome = (value) => value.replace(/[^a-zA-Z-à-ú\ s'-]/, '');
+    const sanitizarNome = (value) => value.replace(/[^a-zA-Z-à-ú\ s'-]/g, '');
+
+    let pacienteSanitizado = {
+      ...pacienteData,
+      nome: sanitizarNome(pacienteData.nome)
+    }
 
     let {
       cpf,
