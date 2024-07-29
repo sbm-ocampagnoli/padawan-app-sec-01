@@ -1,3 +1,4 @@
+import { pacienteSchema } from './pacienteYupSchema';
 // import { type Request, type Response } from 'express'
 import { Request, Response } from 'express';
 import { Paciente } from './pacienteEntity.js'
@@ -8,6 +9,7 @@ import { mapeiaPlano } from '../utils/planoSaudeUtils.js'
 import { Consulta } from '../consultas/consultaEntity.js'
 import { AppError, Status } from '../error/ErrorHandler.js'
 import { encryptPassword } from '../utils/senhaUtils.js'
+import { pacienteSchema } from './pacienteYupSchema.js';
 
 export const consultaPorPaciente = async (
   req: Request,
@@ -42,6 +44,8 @@ export const criarPaciente = async (
       ...pacienteData,
       nome: sanitizarNome(pacienteData.nome)
     }
+
+    await pacienteSchema.validate(pacienteSanitizado);
 
     let {
       cpf,
