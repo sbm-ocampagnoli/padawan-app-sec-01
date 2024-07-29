@@ -1,4 +1,3 @@
-import { pacienteSchema } from './pacienteYupSchema';
 // import { type Request, type Response } from 'express'
 import { Request, Response } from 'express';
 import { Paciente } from './pacienteEntity.js'
