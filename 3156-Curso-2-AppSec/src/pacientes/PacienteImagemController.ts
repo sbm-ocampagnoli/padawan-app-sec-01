@@ -74,7 +74,9 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
     paciente.imagem = imagem
     await AppDataSource.manager.save(Paciente, paciente)
 
-    return res.json(imagem)
+    const {url: _url, ...imagemSemCaminho} = imagem;
+
+    return res.json(imagemSemCaminho)
   } catch (error) {
     return res.status(400).json({ error: error.message })
   }
