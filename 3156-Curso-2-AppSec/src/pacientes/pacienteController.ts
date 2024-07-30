@@ -107,7 +107,9 @@ export const criarPaciente = async (
 
     await AppDataSource.manager.save(Paciente, paciente)
 
-    res.status(202).json(paciente)
+    const {senha: _senha, cpf: _cpf, ...pacienteSemDadosSensiveis} = paciente;
+
+    res.status(202).json(pacienteSemDadosSensiveis)
   } catch (error) {
     if (error.name === 'ValidationError') {
       res.status(400).json({ message: error.message })
