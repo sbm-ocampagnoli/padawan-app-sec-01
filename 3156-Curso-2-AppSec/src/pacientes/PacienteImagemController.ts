@@ -4,9 +4,9 @@ import { AppDataSource } from '../data-source.js'
 import { Paciente } from './pacienteEntity.js'
 import { AppError, Status } from '../error/ErrorHandler.js'
 import { Imagem } from '../imagem/imagemEntity.js'
-import { unlinkSync } from 'node:fs'
 import { extname, resolve, dirname } from 'path'
-import { mime } from 'mime-types';
+import { mime } from 'mime-types'
+import * as fs from 'fs'
 
 const __filename = import.meta.url.substring(7)
 const __dirname = dirname(__filename)
@@ -36,14 +36,20 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
     console.log(req.file)
     const { originalname: nome, size: tamanho, filename: key, url = '' } = req.file
 
-    const acceptedMimeTypes = ['image/jpeg', 'image/png', 'image/svg+xml']
+    const acceptedMimeTypes = ['image/jpeg', 'image/png']
 
     const ext = extname(req.file.originalname).slice(1).toLocaleLowerCase();
 
     const mimetype = mime.lookup(ext);
 
-    if(!mimetype || !acceptedMimeTypes.includes(mimetype)){
+    if (!mimetype || !acceptedMimeTypes.includes(mimetype)) {
       return res.status(400).json({ error: 'Insira uma imagem válida.' })
+    }
+
+    const imageContent = fs.readFileSync(req.file.path, 'utf-8');
+
+    if(/\<script[\s\S]*?\>/s.test(imageContent)){
+      return res.status(400).json({ error: 'Imagem contém scripts não permitidos!' })
     }
 
     const imagem = new Imagem()
@@ -56,7 +62,7 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
     await AppDataSource.manager.save(Imagem, imagem)
 
     if (imagem.url === '') {
-      imagem.url = resolve(__dirname, ".." , ".." ,"tmp", "uploads", key)
+      imagem.url = resolve(__dirname, "..", "..", "tmp", "uploads", key)
     }
 
     paciente.imagem = imagem
@@ -108,7 +114,7 @@ export const destroiImagem = async (req: Request, res: Response): Promise<Respon
         '..',
         'tmp',
         'uploads',
-          `${imagem.key}`
+        `${imagem.key}`
       )
     )
 
