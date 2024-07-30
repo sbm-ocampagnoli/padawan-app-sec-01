@@ -7,6 +7,7 @@ import { Imagem } from '../imagem/imagemEntity.js'
 import { extname, resolve, dirname } from 'path'
 import { mime } from 'mime-types'
 import * as fs from 'fs'
+import { error } from 'console'
 
 const __filename = import.meta.url.substring(7)
 const __dirname = dirname(__filename)
@@ -36,7 +37,8 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
     console.log(req.file)
     const { originalname: nome, size: tamanho, filename: key, url = '' } = req.file
 
-    const acceptedMimeTypes = ['image/jpeg', 'image/png']
+    const acceptedMimeTypes = ['image/jpeg', 'image/png'];
+    const maxSize = 20 * 1024 * 1024; // 20MB
 
     const ext = extname(req.file.originalname).slice(1).toLocaleLowerCase();
 
@@ -48,8 +50,12 @@ export const criaImagem = async (req: Request, res: Response): Promise<Response>
 
     const imageContent = fs.readFileSync(req.file.path, 'utf-8');
 
-    if(/\<script[\s\S]*?\>/s.test(imageContent)){
+    if (/\<script[\s\S]*?\>/s.test(imageContent)) {
       return res.status(400).json({ error: 'Imagem contém scripts não permitidos!' })
+    }
+
+    if(tamanho > maxSize) {
+      return res.status(400).json({ error: 'Imagem excede o tamanho permitido! '});
     }
 
     const imagem = new Imagem()
